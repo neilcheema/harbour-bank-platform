@@ -1,0 +1,12 @@
+target/
+build/
+.idea/
+*.iml
+.vscode/
+.DS_Store
+*.log
+.env
+.env.*
+node_modules/
+web/dist/
+web/.angular/

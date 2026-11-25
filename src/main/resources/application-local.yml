@@ -1,0 +1,7 @@
+# Local development profile: matches docker-compose.yml.
+# Run with: SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/harbour
+    username: harbour
+    password: harbour_dev_only
