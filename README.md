@@ -2,7 +2,7 @@
 
 A portfolio project: a modular, cloud-ready digital banking backend in **Java 21 / Spring Boot 3** with an **Angular** front end. It models the services a retail bank's digital channels depend on: accounts, a double-entry ledger, safe money transfers, event-driven notifications, and a swappable adapter in front of a core banking system.
 
-> **Status:** Design phase. This document is the blueprint; see [`DEVELOPMENT_PLAN.md`](DEVELOPMENT_PLAN.md) for the week-by-week build.
+> **Status:** Week 1 in progress (customers and accounts modules). This document is the blueprint; see [`DEVELOPMENT_PLAN.md`](DEVELOPMENT_PLAN.md) for the week-by-week build.
 >
 > **Disclaimer:** Personal learning project. Fictional bank ("Harbour"), **synthetic data only**. No real customer data, no employer systems, no proprietary information.
 
