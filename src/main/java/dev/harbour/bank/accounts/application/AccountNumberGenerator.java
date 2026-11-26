@@ -1,18 +1,11 @@
 package dev.harbour.bank.accounts.application;
 
-import java.util.concurrent.atomic.AtomicLong;
-import org.springframework.stereotype.Component;
-
 /**
- * Issues account numbers in a fictional scheme ("HB-" plus ten digits). Sequential and in-memory
- * for now; Week 2 will base it on a database sequence so numbers survive restarts.
+ * Issues unique account numbers. An interface so the service does not care where numbers come from:
+ * production uses a PostgreSQL sequence, unit tests use a simple counter (a lambda is enough).
  */
-@Component
-public class AccountNumberGenerator {
+@FunctionalInterface
+public interface AccountNumberGenerator {
 
-    private final AtomicLong next = new AtomicLong(1_000_000_000L);
-
-    public String next() {
-        return "HB-%010d".formatted(next.getAndIncrement());
-    }
+    String next();
 }

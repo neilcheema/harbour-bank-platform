@@ -1,22 +1,56 @@
 package dev.harbour.bank.customers.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
 /**
- * A bank customer. This is a plain Java class with no framework annotations: the business rules
- * live here and can be tested without Spring. In Week 2 it gains JPA mapping.
+ * A bank customer.
+ *
+ * <p>The business rules live here and are tested without Spring or a database. The class also carries
+ * JPA mapping annotations (the standard {@code jakarta.persistence} API, not Spring) so it can be stored
+ * directly; see ADR-011 for why we accepted that trade-off.
+ *
+ * <p>Because JPA sets fields by reflection, the fields are not {@code final} and there is a protected
+ * no-argument constructor that only the persistence layer uses.
  */
-public final class Customer {
+@Entity
+@Table(name = "customers")
+public class Customer {
 
-    private final UUID id;
-    private final String fullName;
-    private final String email;
-    private final Instant createdAt;
+    @Id
+    private UUID id;
+
+    // Wrapper type on purpose: null means "never saved", which is how Spring Data decides between
+    // INSERT and UPDATE for an entity whose id we assign ourselves.
+    @Version
+    private Long version;
+
+    @Column(name = "full_name", nullable = false, length = 120)
+    private String fullName;
+
+    @Column(nullable = false, length = 254)
+    private String email;
+
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
     private CustomerStatus status;
+
+    /** For JPA only. */
+    protected Customer() {}
 
     private Customer(UUID id, String fullName, String email, Instant createdAt, CustomerStatus status) {
         this.id = id;
@@ -35,7 +69,9 @@ public final class Customer {
                 UUID.randomUUID(),
                 fullName.strip(),
                 email.strip().toLowerCase(Locale.ROOT),
-                clock.instant(),
+                // PostgreSQL stores microseconds; truncating here keeps the in-memory value identical
+                // to what we read back later.
+                clock.instant().truncatedTo(ChronoUnit.MICROS),
                 CustomerStatus.ACTIVE);
     }
 

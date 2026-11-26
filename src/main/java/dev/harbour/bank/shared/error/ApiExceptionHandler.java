@@ -3,6 +3,7 @@ package dev.harbour.bank.shared.error;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -35,6 +36,19 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         };
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
         problem.setTitle(status.getReasonPhrase());
+        return problem;
+    }
+
+    /**
+     * A database constraint (for example the unique email index) rejected the write. This is what
+     * protects us when two concurrent requests slip past the friendly checks in the services. The
+     * low-level database message is deliberately not sent to the client.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrity(DataIntegrityViolationException ex) {
+        ProblemDetail problem =
+                ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "The request conflicts with existing data.");
+        problem.setTitle(HttpStatus.CONFLICT.getReasonPhrase());
         return problem;
     }
 

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AccountService {
@@ -34,6 +35,7 @@ public class AccountService {
         this.clock = clock;
     }
 
+    @Transactional
     public Account open(UUID customerId, AccountType type, String currencyCode) {
         CustomerView customer =
                 customers.find(customerId).orElseThrow(() -> new NotFoundException("Customer", customerId));
@@ -58,17 +60,24 @@ public class AccountService {
         return accounts.save(account);
     }
 
+    @Transactional(readOnly = true)
     public Account get(UUID id) {
         return accounts.findById(id).orElseThrow(() -> new NotFoundException("Account", id));
     }
 
     /** Lists a customer's accounts, or every account when {@code customerId} is null. */
+    @Transactional(readOnly = true)
     public List<Account> list(UUID customerId) {
         return customerId == null ? accounts.findAll() : accounts.findByCustomerId(customerId);
     }
 
+    /**
+     * Inside this transaction the loaded account is "managed": Hibernate notices the status change and
+     * writes it when the transaction commits, guarded by the version column (optimistic locking).
+     */
+    @Transactional
     public Account changeStatus(UUID id, AccountStatus target) {
-        Account account = get(id);
+        Account account = accounts.findById(id).orElseThrow(() -> new NotFoundException("Account", id));
         account.changeStatus(target);
         return accounts.save(account);
     }

@@ -4,7 +4,9 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none        # schema is owned by Flyway (ADR-009)
+      # Flyway owns the schema (ADR-009). "validate" makes Hibernate check at startup that every
+      # mapped entity matches a real table and column, and refuse to start if they drift apart.
+      ddl-auto: validate
     properties:
       hibernate:
         jdbc:

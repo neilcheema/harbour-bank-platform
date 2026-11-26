@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -39,8 +40,11 @@ class AccountServiceTest {
     };
 
     private final InMemoryAccountRepository repository = new InMemoryAccountRepository();
-    private final AccountService service =
-            new AccountService(repository, directory, new AccountNumberGenerator(), clock);
+    // AccountNumberGenerator is a one-method interface, so a lambda is a complete fake.
+    private final AtomicLong nextNumber = new AtomicLong(1_000_000_000L);
+    private final AccountNumberGenerator numbers = () -> "HB-%010d".formatted(nextNumber.getAndIncrement());
+
+    private final AccountService service = new AccountService(repository, directory, numbers, clock);
 
     @Test
     void opensAnActiveAccountForAnActiveCustomer() {

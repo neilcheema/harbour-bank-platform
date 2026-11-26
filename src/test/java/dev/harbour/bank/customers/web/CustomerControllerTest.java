@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -84,6 +85,23 @@ class CustomerControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.detail").value("A customer with this email already exists"));
+    }
+
+    @Test
+    void databaseConstraintViolationReturns409WithoutLeakingDatabaseDetails() throws Exception {
+        given(service.register("Ada Lovelace", "ada@example.com"))
+                .willThrow(new DataIntegrityViolationException(
+                        "duplicate key value violates unique constraint \"uq_customers_email\""));
+
+        mvc.perform(post("/api/v1/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"fullName": "Ada Lovelace", "email": "ada@example.com"}"""))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.detail").value("The request conflicts with existing data."))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("uq_customers_email"))));
     }
 
     @Test

@@ -5,3 +5,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/harbour
     username: harbour
     password: harbour_dev_only
+
+# Print every SQL statement Hibernate runs (handy while learning what each request does).
+logging:
+  level:
+    org.hibernate.SQL: DEBUG

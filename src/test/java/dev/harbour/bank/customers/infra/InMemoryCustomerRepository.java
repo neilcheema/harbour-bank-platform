@@ -8,10 +8,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import org.springframework.stereotype.Repository;
 
-/** Temporary in-memory store (Week 1). Data is lost on restart. */
-@Repository
+/**
+ * In-memory fake of the repository port, used by fast unit tests that need no database. It lives in
+ * the test source set and is deliberately NOT a Spring bean: the application uses the JPA adapter.
+ */
 public class InMemoryCustomerRepository implements CustomerRepository {
 
     private final Map<UUID, Customer> store = new ConcurrentHashMap<>();
