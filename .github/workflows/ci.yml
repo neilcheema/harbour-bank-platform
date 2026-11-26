@@ -22,5 +22,10 @@ jobs:
           cache: maven
 
       # GitHub-hosted runners include Docker, which Testcontainers needs.
+      # Testcontainers 1.21.x asks Docker for an old API version that the newest Docker Engine
+      # on GitHub runners rejects. Pin a newer one for the Docker client library.
+      - name: Configure Docker API version for Testcontainers
+        run: echo "api.version=1.44" > ~/.docker-java.properties
+
       - name: Build and test
         run: mvn -B -ntp verify
